@@ -179,9 +179,9 @@ async function checkForNewClips() {
                 new_clips = onlyInLeft(resp.data.data, clips, isSameClip);
 
                 if (new_clips.length > 0) {
-                    new_clips.forEach((clip) => {
-                        post_clip(clip);
-                    });
+                    for (const clip of new_clips) {
+                        await post_clip(clip);
+                    };
                     clips = resp.data.data;
                 }
             }
