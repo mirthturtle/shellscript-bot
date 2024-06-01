@@ -120,7 +120,7 @@ async function setup_discord_globals() {
     if (!clipreel_channel) {
         throw "Can't find clipreel channel. Terminated.";
     }
-    console.log('Discord client set up.');
+    console.log(`${Date.now()} Discord client set up.`);
 }
 
 async function startPollingTwitch() {
@@ -171,8 +171,6 @@ async function checkForNewClips() {
         if (!resp.data.data.length) {
             console.log('No clips returned from Twitch.');
         } else {
-            console.log(resp.data);
-
             if (clips.length == 0) {
                 // if no clips yet, fill up clips array
                 console.log('Filling up clip array');
