@@ -1,46 +1,56 @@
-const { Client, Intents } = require('discord.js');
-const { token, client_id, client_secret } = require('./config.json');
+const { Client, GatewayIntentBits } = require('discord.js');
+const { discord_token, twitch_client_id, twitch_client_secret, guild_id, announcement_channel_id, alert_role } = require('./config.json');
 const axios = require("axios");
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES, Intents.FLAGS.GUILD_MEMBERS], partials: ['MESSAGE', 'CHANNEL'] });
-const MIRTH_GUILD_ID = "703321804600770602";
-const ANNOUNCEMENT_CHANNEL_ID = "705881658930233384";
-const ALERT_ROLE = "814917425019092993";
-const MIRTH_MESSAGES = [
+
+const discord_client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.MessageContent
+    ],
+    partials: ['MESSAGE', 'CHANNEL'] }
+);
+
+const GOLIVE_MESSAGES = [
     "mirthturtle is streaming! Won't you come watch? <:charlie:727649900602589234>",
     "mirthturtle's live! You don't want to miss this one... <:charlie:727649900602589234>",
     "A mirthturtle stream begins! Don't miss this special event... <:charlie:727649900602589234>",
     "You are cordially invited to mirthturtle's stream, starting now! <:charlie:727649900602589234>",
     "mirthturtle is live! Come say hi or you can also lurk creepily. <:charlie:727649900602589234>",
 ];
+
 let twitch_api_token;
-let mirth_guild;
+let guild;
 let announcement_channel;
-let streamwatcher;
+let streamwatcher_role;
 let is_live;
-client.once('ready', async () => {
+
+discord_client.once('ready', async () => {
     console.log('SHELLSCRIPT ready!');
-    await setup_globals();
-    client.user.setActivity("for streams...", { type: "WATCHING" });
-    await refresh_token();
-    startPolling();
+    await setup_discord_globals();
+    discord_client.user.setActivity("for streams...", { type: "WATCHING" });
+    await refresh_twitch_token();
+    startPollingTwitch();
 });
 
-
 // Catch infrequent unhandled WebSocket error within discord.js
-client.on('shardError', async (error) => {
+discord_client.on('shardError', async (error) => {
     console.error(`A websocket connection encountered an error at ${Date.now()}:`, error);
 });
 
-client.on('unhandledRejection', error => {
+discord_client.on('unhandledRejection', error => {
     console.error(`An unhandled rejection encountered at ${Date.now()}:`, error);
 });
 
-client.on('error', error => {
+discord_client.on('error', error => {
     console.error(`An error encountered at ${Date.now()}:`, error);
 });
 
-client.on('messageCreate', async (message) => {
-    const member = await mirth_guild.members.fetch(message.author.id);
+discord_client.on('messageCreate', async (message) => {
+    console.log(message);
+    const member = await guild.members.fetch(message.author.id);
     if (!member) {
         await message.author.send("You need to be in mirthturtle's discord server to use SHELLSCRIPT!");
         return;
@@ -49,12 +59,12 @@ client.on('messageCreate', async (message) => {
         if (message.guild) {
             await message.delete();
         }
-        if (member.roles.cache.has(ALERT_ROLE)) {
+        if (member.roles.cache.has(alert_role)) {
             await message.author.send("You're already a @streamwatcher! But now especially so.");
             return;
         }
         try {
-            await member.roles.add(streamwatcher);
+            await member.roles.add(streamwatcher_role);
             await message.author.send("Welcome, @streamwatcher! I'll ping you whenever mirthturtle starts streaming.");
             console.log(`Given streamwatcher role to ${message.author.username}.`);
         } catch (error) {
@@ -66,12 +76,12 @@ client.on('messageCreate', async (message) => {
         if (message.guild) {
             await message.delete();
         }
-        if (!member.roles.cache.has(ALERT_ROLE)) {
+        if (!member.roles.cache.has(alert_role)) {
             await message.author.send("I'm pretty sure you're not currently a @streamwatcher...");
             return;
         }
         try {
-            await member.roles.remove(streamwatcher);
+            await member.roles.remove(streamwatcher_role);
             await message.author.send("OK, you won't receive @streamwatcher notifications anymore. Not from me, anyway...");
             console.log(`Removed streamwatcher role from ${message.author.username}.`);
         } catch (error) {
@@ -81,31 +91,31 @@ client.on('messageCreate', async (message) => {
     }
 });
 
-async function setup_globals() {
-    mirth_guild = client.guilds.cache.get(MIRTH_GUILD_ID);
-    if (!mirth_guild) {
+async function setup_discord_globals() {
+    guild = discord_client.guilds.cache.get(guild_id);
+    if (!guild) {
         throw "Issue finding mirthturtle's discord server. Terminated.";
     }
-    announcement_channel = client.channels.cache.get(ANNOUNCEMENT_CHANNEL_ID);
+    announcement_channel = discord_client.channels.cache.get(announcement_channel_id);
     if (!announcement_channel) {
         throw "Issue finding announcement channel. Terminated.";
     }
-    streamwatcher = announcement_channel.guild.roles.cache.find(r => r.id === ALERT_ROLE);
-    if (!streamwatcher) {
+    streamwatcher_role = announcement_channel.guild.roles.cache.find(r => r.id === alert_role);
+    if (!streamwatcher_role) {
         throw "Issue finding streamwatcher role. Terminated.";
     }
 }
 
-async function startPolling() {
-    setInterval(async function () { await checkLive(); }, 30 * 1000);
+async function startPollingTwitch() {
+    setInterval(async function () { await checkForLiveStreams(); }, 30 * 1000);
 }
 
-async function checkLive() {
+async function checkForLiveStreams() {
     try {
         let resp = await axios.get('https://api.twitch.tv/helix/streams?user_login=mirthturtle', {
             headers: {
                 'Authorization': 'Bearer ' + twitch_api_token,
-                'Client-ID': client_id
+                'Client-ID': twitch_client_id
             }
         });
         if (!resp.data.data.length) {
@@ -113,7 +123,7 @@ async function checkLive() {
         } else if (resp.data.data[0].type == "live") {
             if (!is_live) {
                 is_live = true;
-                await alert_live();
+                await post_live_alert();
             }
         } else {
             is_live = false;
@@ -123,7 +133,7 @@ async function checkLive() {
         if (error.response) {
             if (error.response.status == 401) {
                 console.log("HTTP Error 401");
-                await refresh_token();
+                await refresh_twitch_token();
             }
         } else {
             console.log(`An error was encountered with the twitch api request at ${Date.now()}: ${error}`);
@@ -131,17 +141,17 @@ async function checkLive() {
     }
 }
 
-async function refresh_token() {
-    let url = `https://id.twitch.tv/oauth2/token?client_id=${client_id}&client_secret=${client_secret}&grant_type=client_credentials`;
+async function refresh_twitch_token() {
+    let url = `https://id.twitch.tv/oauth2/token?client_id=${twitch_client_id}&client_secret=${twitch_client_secret}&grant_type=client_credentials`;
     let resp = await axios.post(url);
-    console.log("Got new token successfully.");
+    console.log("Got new twitch token successfully.");
     twitch_api_token = resp.data.access_token;
 }
 
-async function alert_live() {
+async function post_live_alert() {
     console.log(`Making live announcement.`);
-    let random = Math.floor(Math.random() * MIRTH_MESSAGES.length);
-    await announcement_channel.send(`<@&${ALERT_ROLE}> ${MIRTH_MESSAGES[random]} https://twitch.tv/mirthturtle`);
+    let random = Math.floor(Math.random() * GOLIVE_MESSAGES.length);
+    await announcement_channel.send(`<@&${alert_role}> ${GOLIVE_MESSAGES[random]} https://twitch.tv/mirthturtle`);
 }
 
-client.login(token);
+discord_client.login(discord_token);
