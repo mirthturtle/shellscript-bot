@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const { discord_token, twitch_client_id, twitch_client_secret, guild_id, announcement_channel_id, clipreel_channel_id, alert_role, twitch_broadcaster_id } = require('./config.json');
 const axios = require("axios");
 
@@ -31,8 +31,7 @@ let clipreel_channel;
 let streamwatcher_role;
 
 discord_client.once('ready', async () => {
-    await setup_discord_globals();
-    discord_client.user.setActivity("for streams...", { type: "WATCHING" });
+    await setup_discord();
     await refresh_twitch_token();
     startPollingTwitch();
 
@@ -102,7 +101,7 @@ discord_client.on('guildMemberAdd', member => {
     channel.send(`Welcome to THE SHELL, ${member}! Please introduce yourself, and type \`!in\` if you'd like to receive stream announcements.`);
 });
 
-async function setup_discord_globals() {
+async function setup_discord() {
     guild = discord_client.guilds.cache.get(guild_id);
     if (!guild) {
         throw "Can't find mirthturtle's discord server. Terminated.";
@@ -111,14 +110,20 @@ async function setup_discord_globals() {
     if (!announcement_channel) {
         throw "Can't find announcement channel. Terminated.";
     }
-    streamwatcher_role = announcement_channel.guild.roles.cache.find(r => r.id === alert_role);
-    if (!streamwatcher_role) {
-        throw "Can't find streamwatcher role. Terminated.";
-    }
     clipreel_channel = discord_client.channels.cache.get(clipreel_channel_id);
     if (!clipreel_channel) {
         throw "Can't find clipreel channel. Terminated.";
     }
+    streamwatcher_role = announcement_channel.guild.roles.cache.find(r => r.id === alert_role);
+    if (!streamwatcher_role) {
+        throw "Can't find streamwatcher role. Terminated.";
+    }
+
+    discord_client.user.setPresence({
+      activities: [{ name: `for streams...`, type: ActivityType.Watching }],
+      status: 'online',
+    });
+
     console.log(`${Date.now()} Discord client set up.`);
 }
 
