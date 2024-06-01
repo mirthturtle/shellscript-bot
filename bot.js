@@ -1,5 +1,5 @@
 const { Client, GatewayIntentBits } = require('discord.js');
-const { discord_token, twitch_client_id, twitch_client_secret, guild_id, announcement_channel_id, alert_role } = require('./config.json');
+const { discord_token, twitch_client_id, twitch_client_secret, guild_id, announcement_channel_id, clipreel_channel_id, alert_role, twitch_broadcaster_id } = require('./config.json');
 const axios = require("axios");
 
 const discord_client = new Client({
@@ -22,17 +22,21 @@ const GOLIVE_MESSAGES = [
 ];
 
 let twitch_api_token;
+let is_live;
+let clips = [];
+
 let guild;
 let announcement_channel;
+let clipreel_channel;
 let streamwatcher_role;
-let is_live;
 
 discord_client.once('ready', async () => {
-    console.log('SHELLSCRIPT ready!');
     await setup_discord_globals();
     discord_client.user.setActivity("for streams...", { type: "WATCHING" });
     await refresh_twitch_token();
     startPollingTwitch();
+
+    console.log(`${Date.now()} SHELLSCRIPT ready!`);
 });
 
 // Catch infrequent unhandled WebSocket error within discord.js
@@ -93,10 +97,7 @@ discord_client.on('messageCreate', async (message) => {
 
 // Event listener for when a new member joins a server
 discord_client.on('guildMemberAdd', member => {
-    // Find the default channel or a specific channel to send the welcome message
     const channel = member.guild.channels.cache.find(ch => ch.name === 'general');
-
-    // If no channel is found, exit
     if (!channel) return;
 
     channel.send(`Welcome to THE SHELL, ${member}! Please introduce yourself, and type \`!in\` if you'd like to receive stream announcements.`);
@@ -105,20 +106,26 @@ discord_client.on('guildMemberAdd', member => {
 async function setup_discord_globals() {
     guild = discord_client.guilds.cache.get(guild_id);
     if (!guild) {
-        throw "Issue finding mirthturtle's discord server. Terminated.";
+        throw "Can't find mirthturtle's discord server. Terminated.";
     }
     announcement_channel = discord_client.channels.cache.get(announcement_channel_id);
     if (!announcement_channel) {
-        throw "Issue finding announcement channel. Terminated.";
+        throw "Can't find announcement channel. Terminated.";
     }
     streamwatcher_role = announcement_channel.guild.roles.cache.find(r => r.id === alert_role);
     if (!streamwatcher_role) {
-        throw "Issue finding streamwatcher role. Terminated.";
+        throw "Can't find streamwatcher role. Terminated.";
     }
+    clipreel_channel = discord_client.channels.cache.get(clipreel_channel_id);
+    if (!clipreel_channel) {
+        throw "Can't find clipreel channel. Terminated.";
+    }
+    console.log('Discord client set up.');
 }
 
 async function startPollingTwitch() {
     setInterval(async function () { await checkForLiveStreams(); }, 30 * 1000);
+    setInterval(async function () { await checkForNewClips(); }, 30 * 1000);
 }
 
 async function checkForLiveStreams() {
@@ -147,20 +154,77 @@ async function checkForLiveStreams() {
                 await refresh_twitch_token();
             }
         } else {
-            console.log(`An error was encountered with the twitch api request at ${Date.now()}: ${error}`);
+            console.log(`${Date.now()} Error occurred checking for live streams: ${error}`);
         }
     }
+}
+
+async function checkForNewClips() {
+    let new_clips;
+    try {
+        let resp = await axios.get(`https://api.twitch.tv/helix/clips?broadcaster_id=${twitch_broadcaster_id}`, {
+            headers: {
+                'Authorization': 'Bearer ' + twitch_api_token,
+                'Client-ID': twitch_client_id
+            }
+        });
+        if (!resp.data.data.length) {
+            console.log('No clips returned from Twitch.');
+        } else {
+            console.log(resp.data);
+
+            if (clips.length == 0) {
+                // if no clips yet, fill up clips array
+                console.log('Filling up clip array');
+                clips = resp.data.data;
+            } else {
+                // if new data has new clips, post then
+                new_clips = onlyInLeft(resp.data.data, clips, isSameClip);
+
+                if (new_clips.length > 0) {
+                    new_clips.forEach((clip) => {
+                        post_clip(clip);
+                    });
+                    clips = resp.data.data;
+                }
+            }
+        }
+    }
+    catch (error) {
+        if (error.response) {
+            if (error.response.status == 401) {
+                console.log("HTTP Error 401");
+                await refresh_twitch_token();
+            }
+        } else {
+            console.log(`${Date.now()} Error checking for clips: ${error}`);
+        }
+    }
+}
+
+const isSameClip = (a, b) => a.title === b.title && a.url === b.url;
+
+// Get items that only occur in the left array,
+// using the compareFunction to determine equality.
+const onlyInLeft = (left, right, compareFunction) =>
+  left.filter(leftValue =>
+    !right.some(rightValue =>
+      compareFunction(leftValue, rightValue)));
+
+async function post_clip(clip) {
+    console.log(`${Date.now()} Posting new clip: ${clip.title}`);
+    await clipreel_channel.send(`<@&${alert_role}> ${clip.url}`);
 }
 
 async function refresh_twitch_token() {
     let url = `https://id.twitch.tv/oauth2/token?client_id=${twitch_client_id}&client_secret=${twitch_client_secret}&grant_type=client_credentials`;
     let resp = await axios.post(url);
-    console.log("Got new twitch token successfully.");
+    console.log(`${Date.now()} Got new twitch token`);
     twitch_api_token = resp.data.access_token;
 }
 
 async function post_live_alert() {
-    console.log(`Making live announcement.`);
+    console.log(`${Date.now()} Making live announcement`);
     let random = Math.floor(Math.random() * GOLIVE_MESSAGES.length);
     await announcement_channel.send(`<@&${alert_role}> ${GOLIVE_MESSAGES[random]} https://twitch.tv/mirthturtle`);
 }
