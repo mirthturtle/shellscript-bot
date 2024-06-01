@@ -91,6 +91,17 @@ discord_client.on('messageCreate', async (message) => {
     }
 });
 
+// Event listener for when a new member joins a server
+discord_client.on('guildMemberAdd', member => {
+    // Find the default channel or a specific channel to send the welcome message
+    const channel = member.guild.channels.cache.find(ch => ch.name === 'general');
+
+    // If no channel is found, exit
+    if (!channel) return;
+
+    channel.send(`Welcome to THE SHELL, ${member}! Please introduce yourself, and type \`!in\` if you'd like to receive stream announcements.`);
+});
+
 async function setup_discord_globals() {
     guild = discord_client.guilds.cache.get(guild_id);
     if (!guild) {

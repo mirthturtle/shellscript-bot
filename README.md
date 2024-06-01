@@ -1,4 +1,4 @@
-# shellscript
+# shellscript-bot
 
 mirthturtle's discord bot.
 
