@@ -53,7 +53,6 @@ discord_client.on('error', error => {
 });
 
 discord_client.on('messageCreate', async (message) => {
-    console.log(message);
     const member = await guild.members.fetch(message.author.id);
     if (!member) {
         await message.author.send("You need to be in mirthturtle's discord server to use SHELLSCRIPT!");
