@@ -74,7 +74,7 @@ discord_client.on('messageCreate', async (message) => {
         if (message.guild) {
             await message.delete();
         }
-        await message.author.send("Hello! Glad you're part of THE SHELL. Here are some commands I respond to:\n• !watch – receive a ping whenever @mirthturtle goes live on Twitch\n• !stop – stop receiving @streamwatchers pings\n• !rules – learn the rules of the server");
+        await message.author.send("Hello! Glad you're part of THE SHELL. Here are some commands I respond to:\n• `!watch` – receive a ping whenever @mirthturtle goes live on Twitch\n• `!stop` – stop receiving go-live pings\n• `!rules` – learn the rules of the server");
         return;
     }
     if (message.content == "!rules") {
