@@ -30,12 +30,25 @@ let announcement_channel;
 let clipreel_channel;
 let streamwatcher_role;
 
+let args = process.argv.slice(2);
+
 discord_client.once('ready', async () => {
     await setup_discord();
     await refresh_twitch_token();
-    startPollingTwitch();
 
-    console.log(`${Date.now()} SHELLSCRIPT ready!`);
+    if (args[0]) {
+        // do one-offs
+        if (args[0] == "post") {
+            post_custom_message("");
+        }
+    } else {
+        // normal start
+        startPollingTwitch();
+        startPollingMirthTurtle();
+
+        console.log(`${Date.now()} SHELLSCRIPT ready!`);
+    }
+
 });
 
 // Catch infrequent unhandled WebSocket error within discord.js
@@ -99,6 +112,7 @@ discord_client.on('guildMemberAdd', member => {
     if (!channel) return;
 
     channel.send(`Welcome to THE SHELL, ${member}! Please introduce yourself, and type \`!in\` if you'd like to receive stream announcements.`);
+    console.log(`${Date.now()} Welcome message sent to ${member}.`);
 });
 
 async function setup_discord() {
@@ -130,6 +144,18 @@ async function setup_discord() {
 async function startPollingTwitch() {
     setInterval(async function () { await checkForLiveStreams(); }, 30 * 1000);
     setInterval(async function () { await checkForNewClips(); }, 30 * 1000);
+}
+
+async function startPollingMirthTurtle() {
+    let hours = 36;
+    setInterval(async function () {
+        let mirthdata = await check_mirthturtle_stats();
+        // TODO if any apply, post a msg in some channel
+
+        // post_custom_message(`It has been **${}** days since the last stream. Please shame @mirthturtle for his sloth.`);
+
+
+    }, 60 * 1000 * 60 * hours);
 }
 
 async function checkForLiveStreams() {
@@ -215,7 +241,7 @@ const onlyInLeft = (left, right, compareFunction) =>
 
 async function post_clip(clip) {
     console.log(`${Date.now()} Posting new clip: ${clip.title}`);
-    await clipreel_channel.send(`<@&${alert_role}> ${clip.url}`);
+    await clipreel_channel.send(`${clip.url}`);
 }
 
 async function refresh_twitch_token() {
@@ -229,6 +255,22 @@ async function post_live_alert() {
     console.log(`${Date.now()} Making live announcement`);
     let random = Math.floor(Math.random() * GOLIVE_MESSAGES.length);
     await announcement_channel.send(`<@&${alert_role}> ${GOLIVE_MESSAGES[random]} https://twitch.tv/mirthturtle`);
+}
+
+async function post_custom_message(message, channelName = 'general') {
+    console.log(`${Date.now()} Posting custom message: ${message}`);
+    const channel = guild.channels.cache.find(ch => ch.name === channelName);
+    if (!channel) {
+        console.log('Channel not found.');
+        return;
+    }
+    await channel.send(`${message}`);
+}
+
+async function check_mirthturtle_stats() {
+    let url = `https://mirthturtle.com/discord_stats`;
+    let resp = await axios.get(url);
+    return resp.data;
 }
 
 discord_client.login(discord_token);
