@@ -39,7 +39,7 @@ discord_client.once('ready', async () => {
     if (args[0]) {
         // do one-offs
         if (args[0] == "post") {
-            post_custom_message("");
+            // post_custom_message("");
         }
     } else {
         // normal start
@@ -70,7 +70,18 @@ discord_client.on('messageCreate', async (message) => {
         await message.author.send("You need to be in mirthturtle's discord server to use SHELLSCRIPT!");
         return;
     }
-    if (message.content == "!in") {
+    if (message.content == "!hi" || message.content == "!help") {
+        if (message.guild) {
+            await message.delete();
+        }
+        await message.author.send("Hello! Glad you're part of THE SHELL. Here are some commands I respond to:\n• !watch – receive a ping whenever @mirthturtle goes live on Twitch\n• !stop – stop receiving @streamwatchers pings\n• !rules – learn the rules of the server");
+        return;
+    }
+    if (message.content == "!rules") {
+        await message.channel.send("\"What are the rules?\" We don't have too many, but here's how we try to keep order:\n• No hate, bigotry, etc.\n• Please do not post the Pepe frog or derivatives\n• There are certain celebrities we do not wish to give a platform to: Musk, Rogan, Trump, Kanye, etc. Not an exhaustive list, but peddlers of hate and misinformation will be deleted!\n• Please do not send me powder of any kind\n• Talk of cryptocurrencies should be relegated to the #business-grifts channel");
+        return;
+    }
+    if (message.content == "!watch") {
         if (message.guild) {
             await message.delete();
         }
@@ -87,7 +98,7 @@ discord_client.on('messageCreate', async (message) => {
             await message.author.send("Something went wrong making you a @streamwatcher! Please complain directly to mirthturtle.");
         }
     }
-    else if (message.content == "!out") {
+    else if (message.content == "!stop") {
         if (message.guild) {
             await message.delete();
         }
@@ -111,7 +122,7 @@ discord_client.on('guildMemberAdd', member => {
     const channel = member.guild.channels.cache.find(ch => ch.name === 'general');
     if (!channel) return;
 
-    channel.send(`Welcome to THE SHELL, ${member}! Please introduce yourself, and type \`!in\` if you'd like to receive stream announcements.`);
+    channel.send(`Welcome to THE SHELL, ${member}! Please introduce yourself, and type \`!hi\` if you'd like to hear more about helpful commands I respond to.`);
     console.log(`${Date.now()} Welcome message sent to ${member}.`);
 });
 
