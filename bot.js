@@ -158,15 +158,36 @@ async function startPollingTwitch() {
 }
 
 async function startPollingMirthTurtle() {
-    let hours = 36;
     setInterval(async function () {
         let mirthdata = await check_mirthturtle_stats();
-        // TODO if any apply, post a msg in some channel
+        // if any apply, post a msg in some channel
 
-        // post_custom_message(`It has been **${}** days since the last stream. Please shame @mirthturtle for his sloth.`);
+        const now = new Date();
+        let hour = now.getHours();
 
+        // time since last Air Mirth One
+        if (hour == 10) {
+            if (mirthdata.airmirthone && mirthdata.airmirthone % 14 == 0) {
+                post_custom_message(`It has been **${mirthdata.airmirthone}** days since the last Air Mirth One! Please shame @mirthturtle for his sloth.`);
+            }
 
-    }, 60 * 1000 * 60 * hours);
+        }
+
+        // time since last ghostcrime download
+        if (hour == 8) {
+            if (mirthdata.ghostcrime && mirthdata.ghostcrime % 10 == 0) {
+                post_custom_message(`It has been **${mirthdata.ghostcrime}** days since anyone downloaded GHOSTCRIME! Please consider doing this: https://mirthturtle.com/ghostcrime`);
+            }
+        }
+
+        // time since last Social star
+        if (hour == 5) {
+            if (mirthdata.stars && mirthdata.stars % 10 == 0) {
+                post_custom_message(`It has been **${mirthdata.stars}** days since someone last ⭐'d a Mirth Turtle Social post! Please make @mirthturtle feel validated: https://mirthturtle.com/social`);
+            }
+        }
+
+    }, 60 * 1000 * 60); // every hour
 }
 
 async function checkForLiveStreams() {
