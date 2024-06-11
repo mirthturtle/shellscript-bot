@@ -166,7 +166,7 @@ async function startPollingMirthTurtle() {
         let hour = now.getHours();
 
         // time since last Air Mirth One
-        if (hour == 10) {
+        if (hour == 12) {
             if (mirthdata.airmirthone && mirthdata.airmirthone % 14 == 0) {
                 post_custom_message(`It has been **${mirthdata.airmirthone}** days since the last Air Mirth One! Please shame @mirthturtle for his sloth.`);
             }
@@ -174,15 +174,15 @@ async function startPollingMirthTurtle() {
         }
 
         // time since last ghostcrime download
-        if (hour == 8) {
-            if (mirthdata.ghostcrime && mirthdata.ghostcrime % 10 == 0) {
+        if (hour == 10) {
+            if (mirthdata.ghostcrime && mirthdata.ghostcrime % 30 == 0) {
                 post_custom_message(`It has been **${mirthdata.ghostcrime}** days since anyone downloaded GHOSTCRIME! Please consider doing this: https://mirthturtle.com/ghostcrime`);
             }
         }
 
         // time since last Social star
         if (hour == 5) {
-            if (mirthdata.stars && mirthdata.stars % 10 == 0) {
+            if (mirthdata.stars && mirthdata.stars % 30 == 0) {
                 post_custom_message(`It has been **${mirthdata.stars}** days since someone last ⭐'d a Mirth Turtle Social post! Please make @mirthturtle feel validated: https://mirthturtle.com/social`);
             }
         }
