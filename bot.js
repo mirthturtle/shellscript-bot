@@ -187,6 +187,13 @@ async function startPollingMirthTurtle() {
             }
         }
 
+        // m3lon nudger
+        if (hour == 8) {
+            if (mirthdata.melon && mirthdata.melon % 50 == 0) {
+                post_custom_message(`It's been **${mirthdata.melon}** days since anyone selected a melon using m3lon's flagship Melon Selector! Select one today: https://mirthturtle.com/m3lon/selector`);
+            }
+        }
+
     }, 60 * 1000 * 60); // every hour
 }
 
