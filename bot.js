@@ -78,7 +78,7 @@ discord_client.on('messageCreate', async (message) => {
         return;
     }
     if (message.content == "!rules") {
-        await message.channel.send("\"What are the rules?\" We don't have too many, but here's how we try to keep order:\n• No hate, bigotry, etc.\n• Please do not post the Pepe frog or derivatives\n• There are certain celebrities we do not wish to give a platform to: Musk, Rogan, Trump, Kanye, etc. Not an exhaustive list, but peddlers of hate and misinformation will be deleted!\n• Please do not send me powder of any kind\n• Talk of cryptocurrencies should be relegated to the #business-grifts channel");
+        await message.channel.send("\"What are the rules?\" Here's how we try to keep order in THE SHELL:\n• No hate, bigotry, etc.\n• Please do not post the Pepe frog or derivatives\n• There are certain celebrities we do not wish to give a platform to: Musk, Rogan, Trump, Kanye, Tate, etc. Not an exhaustive list, but peddlers of hate and misinformation will be deleted!\n• Talk of cryptocurrencies should be relegated to the #business-grifts channel\n• Please 'spoiler' any unpleasantness such as blood, spiders, etc. or simply do not post it\n• Please do not send me powder of any kind\n• Have fun and make friends!");
         return;
     }
     if (message.content == "!watch") {
