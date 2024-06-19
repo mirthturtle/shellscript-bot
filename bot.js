@@ -122,7 +122,7 @@ discord_client.on('guildMemberAdd', member => {
     const channel = member.guild.channels.cache.find(ch => ch.name === 'general');
     if (!channel) return;
 
-    channel.send(`Welcome to THE SHELL, ${member}! Please introduce yourself, and type \`!hi\` if you'd like to hear more about helpful commands I respond to.`);
+    channel.send(`Welcome to THE SHELL, ${member}! Please introduce yourself, and type \`!hi\` to confirm your humanity and learn other helpful commands I respond to.`);
     console.log(`${Date.now()} Welcome message sent to ${member}.`);
 });
 
