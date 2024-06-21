@@ -37,9 +37,12 @@ discord_client.once('ready', async () => {
     await refresh_twitch_token();
 
     if (args[0]) {
-        // do one-offs
+        // do one-offs: `node bot.js clip`
         if (args[0] == "post") {
             // post_custom_message("");
+        }
+        if (args[0] == "clip") {
+
         }
     } else {
         // normal start
@@ -246,12 +249,13 @@ async function checkForNewClips() {
                 clips = resp.data.data;
             } else {
                 // if new data has new clips, post then
-                new_clips = onlyInLeft(resp.data.data, clips, isSameClip);
+                new_clips = onlyInLeft(resp.data.data, clips);
 
                 if (new_clips.length > 0) {
                     for (const clip of new_clips) {
                         await post_clip(clip);
                     };
+                    // refresh store of clips
                     clips = resp.data.data;
                 }
             }
@@ -273,10 +277,10 @@ const isSameClip = (a, b) => a.title === b.title && a.url === b.url;
 
 // Get items that only occur in the left array,
 // using the compareFunction to determine equality.
-const onlyInLeft = (left, right, compareFunction) =>
+const onlyInLeft = (left, right) =>
   left.filter(leftValue =>
     !right.some(rightValue =>
-      compareFunction(leftValue, rightValue)));
+      isSameClip(leftValue, rightValue)));
 
 async function post_clip(clip) {
     console.log(`${Date.now()} Posting new clip: ${clip.title}`);
