@@ -42,7 +42,7 @@ discord_client.once('ready', async () => {
             // post_custom_message("");
         }
         if (args[0] == "clip") {
-
+            checkForNewClips();
         }
     } else {
         // normal start
@@ -233,8 +233,13 @@ async function checkForLiveStreams() {
 
 async function checkForNewClips() {
     let new_clips;
+    const today = new Date();
+    const day = padWithZeros( Math.max( today.getDate() - 1, 1), 2);  // get from yesterday onwards to be safe
+    const month = padWithZeros( today.getMonth() + 1, 2); // Adding 1 to get 1-12 for January-December
+    const year = today.getFullYear();
+
     try {
-        let resp = await axios.get(`https://api.twitch.tv/helix/clips?broadcaster_id=${twitch_broadcaster_id}`, {
+        let resp = await axios.get(`https://api.twitch.tv/helix/clips?broadcaster_id=${twitch_broadcaster_id}&started_at=${year}-${month}-${day}T00:00:00Z`, {
             headers: {
                 'Authorization': 'Bearer ' + twitch_api_token,
                 'Client-ID': twitch_client_id
@@ -285,6 +290,10 @@ const onlyInLeft = (left, right) =>
 async function post_clip(clip) {
     console.log(`${Date.now()} Posting new clip: ${clip.title}`);
     await clipreel_channel.send(`${clip.url}`);
+}
+
+function padWithZeros(number, length) {
+    return number.toString().padStart(length, '0');
 }
 
 async function refresh_twitch_token() {
