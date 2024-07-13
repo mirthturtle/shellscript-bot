@@ -1,6 +1,6 @@
 # shellscript-bot
 
-mirthturtle's discord bot.
+mirthturtle's discord bot. Original version by [derfarctor](https://github.com/derfarctor/).
 
 ### Requirements (npm)
 - discord.js
