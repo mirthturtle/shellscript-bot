@@ -157,7 +157,7 @@ async function setup_discord() {
 
 async function startPollingTwitch() {
     setInterval(async function () { await checkForLiveStreams(); }, 30 * 1000);
-    setInterval(async function () { await checkForNewClips(); }, 30 * 1000);
+    setInterval(async function () { await checkForNewClips(); }, 60 * 1000);
 }
 
 async function startPollingMirthTurtle() {
@@ -179,21 +179,21 @@ async function startPollingMirthTurtle() {
         // time since last ghostcrime download
         if (hour == 10) {
             if (mirthdata.ghostcrime && mirthdata.ghostcrime % 30 == 0) {
-                post_custom_message(`It has been **${mirthdata.ghostcrime}** days since anyone downloaded GHOSTCRIME! Please consider doing this: https://mirthturtle.com/ghostcrime`);
+                post_custom_message(`It has been a while since anyone downloaded GHOSTCRIME! Consider reading this full-length novel: https://mirthturtle.com/ghostcrime`);
             }
         }
 
         // time since last Social star
         if (hour == 5) {
             if (mirthdata.stars && mirthdata.stars % 30 == 0) {
-                post_custom_message(`It has been **${mirthdata.stars}** days since someone last ⭐'d a Mirth Turtle Social post! Please make @mirthturtle feel validated: https://mirthturtle.com/social`);
+                post_custom_message(`It has been a while since someone last ⭐'d a Mirth Turtle Social post! Go see what thoughts @mirthturtle has been unwisely posting: https://mirthturtle.com/social`);
             }
         }
 
         // m3lon nudger
         if (hour == 8) {
             if (mirthdata.melon && mirthdata.melon % 50 == 0) {
-                post_custom_message(`It's been **${mirthdata.melon}** days since anyone selected a melon using m3lon's flagship Melon Selector! Select one today: https://mirthturtle.com/m3lon/selector`);
+                post_custom_message(`It's been too long since anyone selected a melon using m3lon's flagship Melon Selector! Select one today: https://mirthturtle.com/m3lon/selector`);
             }
         }
 
