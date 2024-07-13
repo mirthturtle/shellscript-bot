@@ -278,7 +278,7 @@ async function checkForNewClips() {
     }
 }
 
-const isSameClip = (a, b) => a.title === b.title && a.url === b.url;
+const isSameClip = (a, b) => a.url === b.url;
 
 // Get items that only occur in the left array,
 // using the compareFunction to determine equality.
