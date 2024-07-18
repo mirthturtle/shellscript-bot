@@ -6,5 +6,6 @@
     "announcement_channel_id": "Discord channel to post announcements",
     "alert_role": "Discord role for bot",
     "clipreel_channel_id": "Discord channel id for posting clips",
-    "twitch_broadcaster_id": "Find this at: https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/"
+    "twitch_broadcaster_id": "Find this at: https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/",
+    "mirth_api_key": "API key for mirthturtle.com"
 }

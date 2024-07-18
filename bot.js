@@ -1,5 +1,5 @@
 const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
-const { discord_token, twitch_client_id, twitch_client_secret, guild_id, announcement_channel_id, clipreel_channel_id, alert_role, twitch_broadcaster_id } = require('./config.json');
+const { discord_token, twitch_client_id, twitch_client_secret, guild_id, announcement_channel_id, clipreel_channel_id, alert_role, twitch_broadcaster_id, mirth_api_key } = require('./config.json');
 const axios = require("axios");
 
 const discordClient = new Client({
@@ -38,12 +38,18 @@ discordClient.once('ready', async () => {
     await refreshTwitchToken();
 
     if (args[0]) {
-        // do one-offs: `node bot.js clip`
+        // do one-offs: `node bot.js clip` etc
         if (args[0] == "post") {
             // postCustomMessage("");
         }
         if (args[0] == "clip") {
             checkForNewClips();
+        }
+        if (args[0] == "live") {
+            turnOnSiteLiveIndicator();
+        }
+        if (args[0] == "dark") {
+            turnOffSiteLiveIndicator();
         }
     } else {
         // normal start
@@ -52,7 +58,6 @@ discordClient.once('ready', async () => {
 
         console.log(`${Date.now()} SHELLSCRIPT ready!`);
     }
-
 });
 
 // Catch infrequent unhandled WebSocket error within discord.js
@@ -210,14 +215,21 @@ async function checkForLiveStreams() {
             }
         });
         if (!resp.data.data.length) {
-            is_live = false;
+            if (is_live) {
+                is_live = false;
+                turnOffSiteLiveIndicator();
+            }
         } else if (resp.data.data[0].type == "live") {
             if (!is_live) {
                 is_live = true;
                 await postLiveAlertToDiscord();
+                turnOnSiteLiveIndicator();
             }
         } else {
-            is_live = false;
+            if (is_live) {
+                is_live = false;
+                turnOffSiteLiveIndicator();
+            }
         }
     }
     catch (error) {
@@ -323,6 +335,22 @@ async function postCustomMessage(message, channelName = 'general') {
 async function checkMirthturtleStats() {
     let url = `https://mirthturtle.com/discord_stats`;
     let resp = await axios.get(url);
+    return resp.data;
+}
+
+async function turnOnSiteLiveIndicator() {
+    let url = `https://mirthturtle.com/go_live`;
+    let resp = await axios.post(url, {
+        token: mirth_api_key
+    });
+    return resp.data;
+}
+
+async function turnOffSiteLiveIndicator() {
+    let url = `https://mirthturtle.com/go_dark`;
+    let resp = await axios.post(url, {
+        token: mirth_api_key
+    });
     return resp.data;
 }
 
