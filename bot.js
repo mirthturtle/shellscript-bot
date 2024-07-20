@@ -56,21 +56,21 @@ discordClient.once('ready', async () => {
         startPollingTwitch();
         startPollingMirthTurtle();
 
-        console.log(`${Date.now()} SHELLSCRIPT ready!`);
+        logMessage("SHELLSCRIPT ready!");
     }
 });
 
 // Catch infrequent unhandled WebSocket error within discord.js
 discordClient.on('shardError', async (error) => {
-    console.error(`A websocket connection encountered an error at ${Date.now()}:`, error);
+    logMessage(`A websocket connection encountered an error:`, error);
 });
 
 discordClient.on('unhandledRejection', error => {
-    console.error(`An unhandled rejection encountered at ${Date.now()}:`, error);
+    logMessage("An unhandled rejection encountered:", error);
 });
 
 discordClient.on('error', error => {
-    console.error(`An error encountered at ${Date.now()}:`, error);
+    logMessage("An error occurred:", error);
 });
 
 discordClient.on('messageCreate', async (message) => {
@@ -101,9 +101,9 @@ discordClient.on('messageCreate', async (message) => {
         try {
             await member.roles.add(streamwatcher_role);
             await message.author.send("Welcome, @streamwatcher! I'll ping you whenever mirthturtle starts streaming.");
-            console.log(`Given streamwatcher role to ${message.author.username}.`);
+            logMessage(`Given streamwatcher role to ${message.author.username}.`);
         } catch (error) {
-            console.log(`There was an error giving streamwatcher role to ${message.author.username}: ${error}`);
+            logMessage(`There was an error giving streamwatcher role to ${message.author.username}: ${error}`);
             await message.author.send("Something went wrong making you a @streamwatcher! Please complain directly to mirthturtle.");
         }
     }
@@ -118,9 +118,9 @@ discordClient.on('messageCreate', async (message) => {
         try {
             await member.roles.remove(streamwatcher_role);
             await message.author.send("OK, you won't receive @streamwatcher notifications anymore. Not from me, anyway...");
-            console.log(`Removed streamwatcher role from ${message.author.username}.`);
+            logMessage(`Removed streamwatcher role from ${message.author.username}.`);
         } catch (error) {
-            console.log(`There was an error removing streamwatcher role from ${message.author.username}: ${error}`);
+            logMessage(`There was an error removing streamwatcher role from ${message.author.username}: ${error}`);
             await message.author.send("Something went wrong removing your @streamwatcher role! Please complain directly to mirthturtle.");
         }
     }
@@ -132,7 +132,7 @@ discordClient.on('guildMemberAdd', member => {
     if (!channel) return;
 
     channel.send(`Welcome to THE SHELL, ${member}! Please introduce yourself, and type \`!hi\` to confirm your humanity and learn other helpful commands I respond to.`);
-    console.log(`${Date.now()} Welcome message sent to ${member}.`);
+    logMessage(`Welcome message sent to ${member}.`);
 });
 
 async function setup_discord() {
@@ -158,7 +158,7 @@ async function setup_discord() {
       status: 'online',
     });
 
-    console.log(`${Date.now()} Discord client set up.`);
+    logMessage(`Discord client set up.`);
 }
 
 async function startPollingTwitch() {
@@ -179,13 +179,12 @@ async function startPollingMirthTurtle() {
             if (mirthdata.airmirthone && mirthdata.airmirthone % 14 == 0) {
                 postCustomMessage(`It has been **${mirthdata.airmirthone}** days since the last Air Mirth One! Please shame @mirthturtle for his sloth.`);
             }
-
         }
 
         // time since last ghostcrime download
         if (hour == 10) {
             if (mirthdata.ghostcrime && mirthdata.ghostcrime % 30 == 0) {
-                postCustomMessage(`It has been a while since anyone downloaded GHOSTCRIME! Consider reading this full-length novel: https://mirthturtle.com/ghostcrime`);
+                postCustomMessage(`It has been a while since anyone downloaded GHOSTCRIME! Consider reading this *classic* full-length novel: https://mirthturtle.com/ghostcrime`);
             }
         }
 
@@ -198,7 +197,7 @@ async function startPollingMirthTurtle() {
 
         // m3lon nudger
         if (hour == 8) {
-            if (mirthdata.melon && mirthdata.melon % 50 == 0) {
+            if (mirthdata.melon && mirthdata.melon % 100 == 0) {
                 postCustomMessage(`It's been too long since anyone selected a melon using m3lon's flagship Melon Selector! Select one today: https://mirthturtle.com/m3lon/selector`);
             }
         }
@@ -235,11 +234,11 @@ async function checkForLiveStreams() {
     catch (error) {
         if (error.response) {
             if (error.response.status == 401) {
-                console.log("HTTP Error 401");
+                logMessage("HTTP Error 401");
                 await refreshTwitchToken();
             }
         } else {
-            console.log(`${Date.now()} Error occurred checking for live streams: ${error}`);
+            logMessage(`Error occurred checking for live streams: ${error}`);
         }
     }
 }
@@ -259,11 +258,11 @@ async function checkForNewClips() {
             }
         });
         if (!resp.data.data.length) {
-            // console.log('No clips returned from Twitch.');
+            // logMessage('No clips returned from Twitch.');
         } else {
             if (clips.length == 0) {
                 // if no clips yet, fill up clips array
-                console.log('Filling up clip array');
+                logMessage('Filling up clip array');
                 clips = resp.data.data;
             } else {
                 // if new data has new clips, post then
@@ -282,51 +281,50 @@ async function checkForNewClips() {
     catch (error) {
         if (error.response) {
             if (error.response.status == 401) {
-                console.log("HTTP Error 401");
+                logMessage("HTTP Error 401 on clips.");
                 await refreshTwitchToken();
             }
         } else {
-            console.log(`${Date.now()} Error checking for clips: ${error}`);
+            logMessage(`Error checking for clips: ${error}`);
         }
     }
 }
 
 const isSameClip = (a, b) => a.url === b.url;
 
-// Get items that only occur in the left array,
-// using the compareFunction to determine equality.
+// Get items that only occur in the left array
 const onlyInLeft = (left, right) =>
   left.filter(leftValue =>
     !right.some(rightValue =>
       isSameClip(leftValue, rightValue)));
 
-async function postClipOnDiscord(clip) {
-    console.log(`${Date.now()} Posting new clip: ${clip.title}`);
-    await clipreel_channel.send(`${clip.url}`);
-}
-
 function padWithZeros(number, length) {
     return number.toString().padStart(length, '0');
+}
+
+async function postClipOnDiscord(clip) {
+    logMessage(`Posting new clip: ${clip.title}`);
+    await clipreel_channel.send(`${clip.url}`);
 }
 
 async function refreshTwitchToken() {
     let url = `https://id.twitch.tv/oauth2/token?client_id=${twitch_client_id}&client_secret=${twitch_client_secret}&grant_type=client_credentials`;
     let resp = await axios.post(url);
-    console.log(`${Date.now()} Got new twitch token`);
     twitch_api_token = resp.data.access_token;
+    logMessage(`Got new twitch token.`);
 }
 
 async function postLiveAlertToDiscord() {
-    console.log(`${Date.now()} Making live announcement`);
+    logMessage(`Making live announcement.`);
     let random = Math.floor(Math.random() * GOLIVE_MESSAGES.length);
     await announcement_channel.send(`<@&${alert_role}> ${GOLIVE_MESSAGES[random]} https://twitch.tv/mirthturtle`);
 }
 
 async function postCustomMessage(message, channelName = 'general') {
-    console.log(`${Date.now()} Posting custom message: ${message}`);
+    logMessage(`Posting custom message: ${message}`);
     const channel = guild.channels.cache.find(ch => ch.name === channelName);
     if (!channel) {
-        console.log('Channel not found.');
+        logMessage('Channel not found.');
         return;
     }
     await channel.send(`${message}`);
@@ -343,6 +341,7 @@ async function turnOnSiteLiveIndicator() {
     let resp = await axios.post(url, {
         token: mirth_api_key
     });
+    logMessage('Site live indicator turned on.');
     return resp.data;
 }
 
@@ -351,7 +350,11 @@ async function turnOffSiteLiveIndicator() {
     let resp = await axios.post(url, {
         token: mirth_api_key
     });
+    logMessage('Site live indicator turned off.');
     return resp.data;
 }
+
+const tzRegex = /\(.*?\)/g; // filter out timezone
+const logMessage = (message) => { console.log(`${new Date().toString().replace(tzRegex, '')}• ${message}`) }
 
 discordClient.login(discord_token);
