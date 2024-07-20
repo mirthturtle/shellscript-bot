@@ -84,10 +84,12 @@ discordClient.on('messageCreate', async (message) => {
             await message.delete();
         }
         await message.author.send("Hello! Glad you're part of THE SHELL. Here are some commands I respond to:\n• `!watch` – receive a ping whenever @mirthturtle goes live on Twitch\n• `!stop` – stop receiving go-live pings\n• `!rules` – learn the rules of the server");
+        logMessage(`User ${message.author.username} said hi.`);
         return;
     }
     if (message.content == "!rules") {
         await message.channel.send("\"What are the rules?\" Here's how we try to keep order in THE SHELL:\n• No hate, bigotry, etc.\n• Please do not post the Pepe frog or derivatives\n• There are certain celebrities we do not wish to give a platform to: Musk, Rogan, Trump, Kanye, Tate, etc. Not an exhaustive list, but peddlers of hate and misinformation will be deleted!\n• Talk of cryptocurrencies should be relegated to the #business-grifts channel\n• Please 'spoiler' any unpleasantness such as blood, spiders, etc. or simply do not post it\n• Please do not send me powder of any kind\n• Have fun and make friends!");
+        logMessage(`Rules requested.`);
         return;
     }
     if (message.content == "!watch") {
@@ -132,7 +134,7 @@ discordClient.on('guildMemberAdd', member => {
     if (!channel) return;
 
     channel.send(`Welcome to THE SHELL, ${member}! Please introduce yourself, and type \`!hi\` to confirm your humanity and learn other helpful commands I respond to.`);
-    logMessage(`Welcome message sent to ${member}.`);
+    logMessage(`Welcome message sent to ${member.username}.`);
 });
 
 async function setup_discord() {
