@@ -178,14 +178,14 @@ async function startPollingMirthTurtle() {
 
         // time since last Air Mirth One
         if (hour == 10) {
-            if (mirthdata.airmirthone && mirthdata.airmirthone % 21 == 0) {
+            if (mirthdata.airmirthone && mirthdata.airmirthone % 30 == 0) {
                 postCustomMessage(`It has been **${mirthdata.airmirthone}** days since the last Air Mirth One! Please shame @mirthturtle for his sloth.`);
             }
         }
 
         // time since last ghostcrime download
         if (hour == 12) {
-            if (mirthdata.ghostcrime && mirthdata.ghostcrime % 30 == 0) {
+            if (mirthdata.ghostcrime && mirthdata.ghostcrime % 50 == 0) {
                 postCustomMessage(`Consider reading this *classic* full-length novel by @mirthturtle: https://mirthturtle.com/ghostcrime`);
             }
         }
@@ -193,14 +193,14 @@ async function startPollingMirthTurtle() {
         // time since last Social star
         if (hour == 13) {
             if (mirthdata.stars && mirthdata.stars % 30 == 0) {
-                postCustomMessage(`Stop your anti-social behaviour immediately and ⭐ some posts: https://mirthturtle.com/social`);
+                postCustomMessage(`Please help give @mirthturtle validation by reading his microthoughts: https://mirthturtle.com/social`);
             }
         }
 
         // m3lon nudger
         if (hour == 14) {
             if (mirthdata.melon && mirthdata.melon % 100 == 0) {
-                postCustomMessage(`It's been too long since anyone selected a melon using m3lon's flagship Melon Selector! Select one today: https://mirthturtle.com/m3lon/selector`);
+                postCustomMessage(`It's been a while since anyone selected a melon using m3lon's flagship Melon Selector! Select one today: https://mirthturtle.com/m3lon/selector`);
             }
         }
 
