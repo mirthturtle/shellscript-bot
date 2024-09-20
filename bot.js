@@ -74,6 +74,9 @@ discordClient.on('error', error => {
 });
 
 discordClient.on('messageCreate', async (message) => {
+    const generalChannel = guild.channels.cache.find(ch => ch.name === 'general');
+    if (!generalChannel) return;
+
     const member = await guild.members.fetch(message.author.id);
     if (!member) {
         await message.author.send("You need to be in mirthturtle's discord server to use SHELLSCRIPT!");
@@ -85,6 +88,8 @@ discordClient.on('messageCreate', async (message) => {
         }
         await message.author.send("Hello! Glad you're part of THE SHELL. Here are some commands I respond to:\n• `!watch` – receive a ping whenever @mirthturtle goes live on Twitch\n• `!stop` – stop receiving go-live pings\n• `!rules` – learn the rules of the server");
         logMessage(`User ${message.author.username} said hi.`);
+        await generalChannel.send(`Thank you for saying hi, ${message.author}.`);
+
         return;
     }
     if (message.content == "!rules") {
@@ -134,7 +139,7 @@ discordClient.on('guildMemberAdd', member => {
     if (!channel) return;
 
     channel.send(`Welcome to THE SHELL, ${member}! Please introduce yourself, and type \`!hi\` to confirm your humanity and learn other helpful commands I respond to.`);
-    logMessage(`Welcome message sent to ${member.username}.`);
+    logMessage(`Welcome message sent to ${member.user.username}.`);
 });
 
 async function setup_discord() {
