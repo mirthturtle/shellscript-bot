@@ -191,14 +191,14 @@ async function startPollingMirthTurtle() {
         // time since last ghostcrime download
         if (hour == 12) {
             if (mirthdata.ghostcrime && mirthdata.ghostcrime % 50 == 0) {
-                postCustomMessage(`Consider reading this *classic* full-length novel by @mirthturtle: https://mirthturtle.com/ghostcrime`);
+                postCustomMessage(`Consider reading this *rare* full-length novel by @mirthturtle: https://mirthturtle.com/ghostcrime`);
             }
         }
 
         // time since last Social star
         if (hour == 13) {
             if (mirthdata.stars && mirthdata.stars % 30 == 0) {
-                postCustomMessage(`Please help give @mirthturtle validation by reading his microthoughts: https://mirthturtle.com/social`);
+                postCustomMessage(`Please help support @mirthturtle's fragile self-worth by clicking ⭐ buttons next to his microthoughts: https://mirthturtle.com/social`);
             }
         }
 
