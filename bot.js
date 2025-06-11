@@ -38,9 +38,9 @@ discordClient.once('ready', async () => {
     await refreshTwitchToken();
 
     if (args[0]) {
-        // do one-offs: `node bot.js clip` etc
+        // do one-offs: `node bot.js post "this is my custom post"` etc
         if (args[0] == "post") {
-            // postCustomMessage("");
+            postCustomMessage(args[1]);
         }
         if (args[0] == "clip") {
             checkForNewClips();
@@ -184,14 +184,16 @@ async function startPollingMirthTurtle() {
         // time since last Air Mirth One
         if (hour == 10) {
             if (mirthdata.airmirthone && mirthdata.airmirthone % 30 == 0) {
-                postCustomMessage(`It has been **${mirthdata.airmirthone}** days since the last Air Mirth One! Please shame @mirthturtle for his sloth.`);
+                postCustomMessage(`It has been **${mirthdata.airmirthone}** days since the last Air Mirth One! Please let @mirthturtle know if you agree this is unacceptable.`);
             }
         }
 
         // time since last ghostcrime download
         if (hour == 12) {
             if (mirthdata.ghostcrime && mirthdata.ghostcrime % 50 == 0) {
-                postCustomMessage(`Consider reading this *rare* full-length novel by @mirthturtle: https://mirthturtle.com/ghostcrime`);
+                let qualities = ['rare', 'highly underrated', 'largely ignored', 'cult favourite'];
+                let qual = Math.floor(Math.random() * qualities.length);
+                postCustomMessage(`Consider reading this *${qual}* full-length novel by @mirthturtle: https://mirthturtle.com/ghostcrime`);
             }
         }
 
@@ -212,7 +214,9 @@ async function startPollingMirthTurtle() {
         // Raccooncoin nudger
         if (hour == 11) {
             if (mirthdata.raccooncoin && mirthdata.raccooncoin % 50 == 0) {
-                postCustomMessage(`Too much of this foul Raccooncoin still exists! Please obliterate some: https://mirthturtle.com/raccooncoin`);
+                let qualities = ['foul', 'awful', 'disgusting', 'foetid'];
+                let qual = Math.floor(Math.random() * qualities.length);
+                postCustomMessage(`Too much of this ${qual} Raccooncoin still exists! Please obliterate some: https://mirthturtle.com/raccooncoin`);
             }
         }
 
