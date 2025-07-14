@@ -191,9 +191,9 @@ async function startPollingMirthTurtle() {
         // time since last ghostcrime download
         if (hour == 12) {
             if (mirthdata.ghostcrime && mirthdata.ghostcrime % 50 == 0) {
-                let qualities = ['rare', 'highly underrated', 'largely ignored', 'cult favourite'];
+                let qualities = ['rare', 'highly underrated', 'largely ignored', 'cult favourite', 'prophetic', 'classic'];
                 let qual = Math.floor(Math.random() * qualities.length);
-                postCustomMessage(`Consider reading this *${qual}* full-length novel by @mirthturtle: https://mirthturtle.com/ghostcrime`);
+                postCustomMessage(`Consider reading this *${qualities[qual]}* full-length novel by @mirthturtle: https://mirthturtle.com/ghostcrime`);
             }
         }
 
@@ -214,9 +214,9 @@ async function startPollingMirthTurtle() {
         // Raccooncoin nudger
         if (hour == 11) {
             if (mirthdata.raccooncoin && mirthdata.raccooncoin % 50 == 0) {
-                let qualities = ['foul', 'awful', 'disgusting', 'foetid'];
+                let qualities = ['foul', 'awful', 'disgusting', 'foetid', 'slimy'];
                 let qual = Math.floor(Math.random() * qualities.length);
-                postCustomMessage(`Too much of this ${qual} Raccooncoin still exists! Please obliterate some: https://mirthturtle.com/raccooncoin`);
+                postCustomMessage(`Too much of this ${qualities[qual]} Raccooncoin still exists! Please obliterate some: https://mirthturtle.com/raccooncoin`);
             }
         }
 
