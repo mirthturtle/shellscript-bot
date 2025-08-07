@@ -31,6 +31,9 @@ let announcement_channel;
 let clipreel_channel;
 let streamwatcher_role;
 
+let lastTimeLiveAnnounced;
+const HOURS_BEFORE_NEXT_NOTIFICATION = 6;
+
 let args = process.argv.slice(2);
 
 discordClient.once('ready', async () => {
@@ -239,8 +242,19 @@ async function checkForLiveStreams() {
         } else if (resp.data.data[0].type == "live") {
             if (!is_live) {
                 is_live = true;
-                await postLiveAlertToDiscord();
                 turnOnSiteLiveIndicator();
+
+                // only send notifications if not done in a while, or never
+                if (!lastTimeLiveAnnounced) {
+                    await postLiveAlertToDiscord();
+                } else {
+                    let timeNow = new Date();
+                    let timeDiffMs = timeNow - lastTimeLiveAnnounced;
+                    let timeDiffSeconds = Math.round(timeDiffMs / 1000);
+                    if (timeDiffSeconds > (HOURS_BEFORE_NEXT_NOTIFICATION * 60 * 60)) {
+                        await postLiveAlertToDiscord();
+                    }
+                }
             }
         } else {
             if (is_live) {
@@ -334,6 +348,8 @@ async function refreshTwitchToken() {
 
 async function postLiveAlertToDiscord() {
     logMessage(`Making live announcement.`);
+    lastTimeLiveAnnounced = new Date();
+
     let random = Math.floor(Math.random() * GOLIVE_MESSAGES.length);
     await announcement_channel.send(`<@&${alert_role}> ${GOLIVE_MESSAGES[random]} https://twitch.tv/mirthturtle`);
 }
